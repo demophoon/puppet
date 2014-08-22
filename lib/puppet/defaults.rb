@@ -1038,6 +1038,11 @@ EOT
         http://docs.puppetlabs.com/puppet/latest/reference/environments.html",
       :deprecated => :allowed_on_commandline,
     },
+    :default_manifest => {
+      :default    => "$confdir/default_manifest",
+      :type       => :file_or_directory,
+      :desc       => "TODO ** Fill me out with something coherent **",
+    },
     :code => {
       :default    => "",
       :desc       => "Code to parse directly.  This is essentially only used
