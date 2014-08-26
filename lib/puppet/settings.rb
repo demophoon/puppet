@@ -27,6 +27,7 @@ class Puppet::Settings
   require 'puppet/settings/config_file'
   require 'puppet/settings/value_translator'
   require 'puppet/settings/environment_conf'
+  require 'puppet/settings/manifest_setting'
 
   # local reference for convenience
   PuppetOptionParser = Puppet::Util::CommandLine::PuppetOptionParser
@@ -668,6 +669,7 @@ class Puppet::Settings
       :enum       => EnumSetting,
       :priority   => PrioritySetting,
       :autosign   => AutosignSetting,
+      :manifest   => ManifestDefault,
   }
 
   # Create a new setting.  The value is passed in because it's used to determine
@@ -1272,6 +1274,7 @@ Generated on #{Time.now}.
 
       if setting
         val = lookup(name)
+        setting.pre_interpolation_validation(val)
         # if we interpolate code, all hell breaks loose.
         if name == :code
           val

@@ -160,6 +160,11 @@ class Puppet::Settings::BaseSetting
     @settings.value(self.name)
   end
 
+  # Validate before interpolation
+  def pre_interpolation_validation(value)
+    value
+  end
+
   # Modify the value when it is first evaluated
   def munge(value)
     value
