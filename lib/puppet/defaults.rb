@@ -1042,16 +1042,20 @@ EOT
       :default    => "./manifests",
       :type       => :string,
       :desc       => "TODO ** Fill me out with something coherent **",
+      :hook       => proc do |value|
+        uninterpolated_value = self.value(true)
+        if uninterpolated_value =~ /\$environment/ then
+          raise(Puppet::Settings::ValidationError, "You cannot interpolate '$environment' within the 'default_manifest' setting.")
+        end
+      end
     },
     :restrict_environment_manifest => {
       :default    => false,
       :type       => :boolean,
       :desc       => "TODO ** Fill me out with something coherent **",
       :hook       => proc do |value|
-        if value
-          case Puppet[:default_manifest]
-          when /^[^\/]/ then raise(Puppet::Settings::ValidationError, ":default_manifest must be set to an absolute path when :restrict_environment_manifest is true")
-          end
+        if value && !Pathname.new(Puppet[:default_manifest]).absolute?
+          raise(Puppet::Settings::ValidationError, "The 'default_manifest' setting must be set to an absolute path when 'restrict_environment_manifest' is true")
         end
       end,
     },

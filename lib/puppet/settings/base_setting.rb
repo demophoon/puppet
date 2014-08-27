@@ -156,8 +156,8 @@ class Puppet::Settings::BaseSetting
   end
 
   # Retrieves the value, or if it's not set, retrieves the default.
-  def value
-    @settings.value(self.name)
+  def value(bypass_interpolation = false)
+    @settings.value(self.name, nil, bypass_interpolation)
   end
 
   # Modify the value when it is first evaluated
