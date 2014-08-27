@@ -1039,9 +1039,21 @@ EOT
       :deprecated => :allowed_on_commandline,
     },
     :default_manifest => {
-      :default    => "$confdir/default_manifest",
-      :type       => :file_or_directory,
+      :default    => "./manifests",
+      :type       => :string,
       :desc       => "TODO ** Fill me out with something coherent **",
+    },
+    :restrict_environment_manifest => {
+      :default    => false,
+      :type       => :boolean,
+      :desc       => "TODO ** Fill me out with something coherent **",
+      :hook       => proc do |value|
+        if value
+          case Puppet[:default_manifest]
+          when /^[^\/]/ then raise(Puppet::Settings::ValidationError, ":default_manifest must be set to an absolute path when :restrict_environment_manifest is true")
+          end
+        end
+      end,
     },
     :code => {
       :default    => "",

@@ -51,15 +51,19 @@ class Puppet::Settings::EnvironmentConf
   end
 
   def manifest
-    puppet_conf_manifest = Puppet.settings.value(:default_manifest)
-    fallback_manifest_directory = File.join(@path_to_env, "manifests")
-    get_setting(:manifest, fallback_manifest_directory) do |manifest|
-      choice = case
-      when section && section.setting(:manifest) then absolute(manifest)
-      when Dir.glob(File.join(fallback_manifest_directory,'*.pp')).empty? then puppet_conf_manifest
-      else fallback_manifest_directory
+    puppet_conf_manifest = Pathname.new(Puppet.settings.value(:default_manifest))
+    restrict_environment_manifest = Puppet.settings.value(:restrict_environment_manifest)
+    if puppet_conf_manifest.absolute?
+      fallback_manifest_directory = puppet_conf_manifest.to_s
+    else
+      fallback_manifest_directory = File.join(@path_to_env, puppet_conf_manifest.to_s)
+    end
+    if restrict_environment_manifest
+      puppet_conf_manifest.to_s
+    else
+      get_setting(:manifest, fallback_manifest_directory) do |manifest|
+        absolute(manifest)
       end
-      choice
     end
   end
 
