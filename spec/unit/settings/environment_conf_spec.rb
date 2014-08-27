@@ -3,8 +3,16 @@ require 'puppet/settings/environment_conf.rb'
 
 describe Puppet::Settings::EnvironmentConf do
 
+  def setup_environment_conf(config, conf_hash)
+    conf_hash.each do |setting,value|
+      config.expects(:setting).with(setting).returns(
+        mock('setting', :value => value)
+      )
+    end
+  end
+
   context "with config" do
-    let(:config) { stub(:config) }
+    let(:config) { stub('config') }
     let(:envconf) { Puppet::Settings::EnvironmentConf.new("/some/direnv", config, ["/global/modulepath"]) }
 
     it "reads a modulepath from config and does not include global_module_path" do
@@ -15,7 +23,7 @@ describe Puppet::Settings::EnvironmentConf do
     end
 
     it "reads a manifest from config" do
-      config.expects(:setting).with(:manifest).twice.returns(
+      config.expects(:setting).with(:manifest).returns(
         mock('setting', :value => '/some/manifest')
       )
       expect(envconf.manifest).to eq(File.expand_path('/some/manifest'))
@@ -51,26 +59,45 @@ describe Puppet::Settings::EnvironmentConf do
 
   describe "with restrict_environment_manifest" do
 
-    let(:config) { stub(:config) }
+    let(:config) { stub('config') }
     let(:envconf) { Puppet::Settings::EnvironmentConf.new("/some/direnv", config, ["/global/modulepath"]) }
 
-    it "ignores environment.conf when true" do
-      config.expects(:setting).with(:manifest).returns(
-        mock('setting', :value => '/some/manifest.pp')
-      )
+    context "set true" do
 
-      Puppet[:default_manifest] = '/default/manifest'
-      Puppet[:restrict_environment_manifest] = true
+      before(:each) do
+        Puppet[:default_manifest] = '/default/manifest'
+        Puppet[:restrict_environment_manifest] = true 
+      end
 
-      expect(envconf.manifest).to eq(File.expand_path('/default/manifest'))
+      it "ignores environment.conf manifest" do
+        setup_environment_conf(config, :manifest => '/some/manifest.pp')
+
+        expect(envconf.manifest).to eq(File.expand_path('/default/manifest'))
+      end
+
+      it "logs error when environment.conf has manifest set" do
+        setup_environment_conf(config, :manifest => '/some/manifest.pp')
+
+        envconf.manifest
+        expect(@logs.first.to_s).to match(/restrict_environment_manifest.*true.*environment.conf.*does not match the default_manifest/)
+      end
+
+      it "does not log an error when environment.conf does not have a manifest set" do
+        setup_environment_conf(config, :manifest => '')
+
+        expect(envconf.manifest).to eq(File.expand_path('/default/manifest'))
+        pp @logs
+        expect(@logs).to be_empty
+      end
     end
 
     it "uses environment.conf when false" do
-    end
+      setup_environment_conf(config, :manifest => '/some/manifest.pp')
 
-    it "logs error when environment.conf has manifest set" do
-    end
+      Puppet[:default_manifest] = '/default/manifest'
+      Puppet[:restrict_environment_manifest] = false
 
+      expect(envconf.manifest).to eq(File.expand_path('/some/manifest.pp'))
+    end
   end
-
 end
