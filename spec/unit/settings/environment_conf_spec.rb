@@ -83,10 +83,9 @@ describe Puppet::Settings::EnvironmentConf do
       end
 
       it "does not log an error when environment.conf does not have a manifest set" do
-        setup_environment_conf(config, :manifest => '')
+        setup_environment_conf(config, :manifest => nil)
 
         expect(envconf.manifest).to eq(File.expand_path('/default/manifest'))
-        pp @logs
         expect(@logs).to be_empty
       end
     end
