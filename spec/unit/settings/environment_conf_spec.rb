@@ -16,26 +16,28 @@ describe Puppet::Settings::EnvironmentConf do
     let(:envconf) { Puppet::Settings::EnvironmentConf.new("/some/direnv", config, ["/global/modulepath"]) }
 
     it "reads a modulepath from config and does not include global_module_path" do
-      config.expects(:setting).with(:modulepath).returns(
-        mock('setting', :value => '/some/modulepath')
-      )
+      setup_environment_conf(config, :modulepath => '/some/modulepath')
+
       expect(envconf.modulepath).to eq(File.expand_path('/some/modulepath'))
     end
 
     it "reads a manifest from config" do
-      config.expects(:setting).with(:manifest).returns(
-        mock('setting', :value => '/some/manifest')
-      )
+      setup_environment_conf(config, :manifest => '/some/manifest')
+
       expect(envconf.manifest).to eq(File.expand_path('/some/manifest'))
     end
 
     it "reads a config_version from config" do
-      config.expects(:setting).with(:config_version).returns(
-        mock('setting', :value => '/some/version.sh')
-      )
+      setup_environment_conf(config, :config_version => '/some/version.sh')
+
       expect(envconf.config_version).to eq(File.expand_path('/some/version.sh'))
     end
 
+    it "read an environment_timeout from config" do
+      setup_environment_conf(config, :environment_timeout => '3m')
+
+      expect(envconf.environment_timeout).to eq(180)
+    end
   end
 
   context "without config" do
@@ -54,6 +56,10 @@ describe Puppet::Settings::EnvironmentConf do
 
     it "returns nothing for config_version when config has none" do
       expect(envconf.config_version).to be_nil
+    end
+
+    it "returns a defult of 0 for environment_timeout when config has none" do
+      expect(envconf.environment_timeout).to eq(0)
     end
   end
 
@@ -83,10 +89,9 @@ describe Puppet::Settings::EnvironmentConf do
       end
 
       it "does not log an error when environment.conf does not have a manifest set" do
-        setup_environment_conf(config, :manifest => '')
+        setup_environment_conf(config, :manifest => nil)
 
         expect(envconf.manifest).to eq(File.expand_path('/default/manifest'))
-        pp @logs
         expect(@logs).to be_empty
       end
     end

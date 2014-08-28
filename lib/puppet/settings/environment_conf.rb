@@ -63,7 +63,6 @@ class Puppet::Settings::EnvironmentConf
 
     if restrict_environment_manifest
       environment_conf_manifest = absolute(section.setting(:manifest).value)
-      puts "ecm: #{environment_conf_manifest}"
       if environment_conf_manifest && fallback_manifest_directory != environment_conf_manifest
         Puppet.err("The 'restrict_environment_manifest' setting is true, but the environment located at #{@path_to_env} has a manifest setting in its environment.conf of '#{environment_conf_manifest}' which does not match the default_manifest setting '#{puppet_conf_manifest}'. If this environment is expecting to find modules in '#{environment_conf_manifest}', they will not be available!")
       end
