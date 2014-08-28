@@ -1044,7 +1044,7 @@ EOT
       :desc       => "TODO ** Fill me out with something coherent **",
       :hook       => proc do |value|
         uninterpolated_value = self.value(true)
-        if uninterpolated_value =~ /\$environment/ then
+        if uninterpolated_value =~ /\$environment/ || value =~ /\$environment/ then
           raise(Puppet::Settings::ValidationError, "You cannot interpolate '$environment' within the 'default_manifest' setting.")
         end
       end
