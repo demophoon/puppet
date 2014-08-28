@@ -237,6 +237,27 @@ class Puppet::Node::Environment
   #     (optional)
   attr_reader :config_version
 
+  # Checks to make sure that if Puppet is configured to restrict individual environments
+  # from setting their manifest (allowing only the main default_manifest setting to be used)
+  # that this environment did not have a manifest set in it's original
+  # environment.conf.  If it did, the environment's modules may not function as
+  # intended by the original authors, and we may seek to halt a puppet
+  # compilation for a node in this environment.
+  #
+  # The only exception to this would be if the environment.conf manifest is an exact,
+  # uninterpolated match for the current default_manifest setting.
+  #
+  # @return [Boolean] true if using directory environments, and
+  # Puppet[:restrict_environment_manifest] is true, and this environment's
+  # original environment.conf had a manifest setting that is not the default_manifest.
+  # @api public
+  def conflicting_manifest_settings?
+    return false if Puppet[:environmentpath].empty? || !Puppet[:restrict_environment_manifest]
+    environment_conf = Puppet.lookup(:environments).get_conf(name)
+    original_manifest = environment_conf.raw_setting(:manifest)
+    !original_manifest.nil? && !original_manifest.empty? && original_manifest != Puppet[:default_manifest]
+  end
+
   # Return an environment-specific Puppet setting.
   #
   # @api public

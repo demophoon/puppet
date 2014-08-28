@@ -14,7 +14,7 @@ describe "Puppet defaults" do
     it "errors when $environment is part of the value" do
       expect {
         Puppet[:default_manifest] = '/$environment/manifest.pp'
-      }.to raise_error Puppet::Settings::ValidationError, /cannot interpolate.*$environment/
+      }.to raise_error Puppet::Settings::ValidationError, /cannot interpolate.*\$environment/
     end
   end
 
